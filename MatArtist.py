@@ -1,4 +1,3 @@
-#Need to work on updating and incrementing position of artists
 from matplotlib import pyplot as plt
 from matplotlib.text import Text
 import numpy as np
@@ -9,6 +8,7 @@ class MatrixArtist:
         #Initialising perimeter
         self.bbox = plt.Rectangle(origin, width, height, ec='black', fc='white')
         self.origin = origin
+        self.data=data
         self.shape = data.shape
         self.cell_size = (width/self.shape[1], height/self.shape[0])        
         self.text_offset = (self.cell_size[0]/4, -2*self.cell_size[1]/3)
@@ -70,10 +70,77 @@ class MatrixArtist:
         
         return(ax)
         
-    def update_pos(self, coords):
+    def update_pos(self, coords, delta=False):
         
         #Updating origin and everything will follow
-        self.origin=coords
+        if delta == True:
+            dx = coords[0]
+            dy = coords[1]
+            self.origin = (self.origin[0] + dx, self.origin[1]+dy)
+        elif delta == False:
+            dx = coords[0] - self.origin[0]
+            dy = coords[1] - self.origin[1]
+            self.origin = coords
         
-        self.bbox.set_xy(coords)
         
+        #Updating bounding box
+        self.bbox.set_xy((self.bbox.xy[0] + dx, self.bbox.xy[1] + dy))
+        
+        #Updating row markers
+        for row in self.rows:
+            x1, x2 = row.get_xdata()
+            y1, y2 = row.get_ydata()
+            x1 += dx
+            x2 += dx
+            y1 += dy
+            y2 += dy
+            
+            row.set_data([x1, x2], [y1, y2])
+            
+        #Updating row markers
+        for col in self.cols:
+            x1, x2 = col.get_xdata()
+            y1, y2 = col.get_ydata()
+            x1 += dx
+            x2 += dx
+            y1 += dy
+            y2 += dy
+            
+            col.set_data([x1, x2], [y1, y2])
+        
+        #Updating numbers
+        for i in range(0,self.shape[0]):
+            for j in range(0,self.shape[1]):
+                x, y = self.nums[i][j].get_position()
+                x += dx
+                y += dy
+                self.nums[i][j].set_position((x,y))
+            
+class BatchMatrixArtist:
+    def __init__(self, origin, width, height, data, displacement, rounding=3):
+        mats = []
+        
+        #Looping through each matrix in the batch and initialising
+        for b, matrix in enumerate(data):
+            origin_temp = (origin[0]+displacement[0]*b, origin[1]+displacement[1]*b)
+            mat = MatrixArtist(origin_temp, width, height, matrix, rounding)
+            mats.append(mat)
+        
+        self.mats = mats
+        self.origin = origin
+        self.width = width
+        self.height = height
+        self.data = data
+        self.shape = data.shape
+        self.displacement = displacement
+        
+    def draw(self, ax):
+        """Passes draw ax to each individual matrix"""
+        for mat in self.mats:
+            mat.draw(ax)
+    
+    def update_pos(self, coords, delta=False):
+        """Passes args to each mat and excutes update_pos iteratively"""
+        for mat in self.mats:
+            mat.update_pos(coords, delta)
+            
