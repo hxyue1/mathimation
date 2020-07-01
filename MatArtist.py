@@ -1,9 +1,35 @@
+"""
+Todo:
+    - add GitHub examples
+    - Add dimensional arrows
+    - Add and remove arrows
+    - Moving matrices independently in batch
+"""
+
 from matplotlib import pyplot as plt
 from matplotlib.text import Text
 import numpy as np
 
 class MatrixArtist:
+    """Class to hold all the matplotlib.artist.Artist instances to plot a matrix
+    
+    Attributes:
+        bbox (matplotlib.patches.Rectangle): Contains the perimeter.
+        origin (tuple): (x,y) tuple for the bottom LH corner of the matrix        
+    
+    TODO: 
+        - Update public attributes
+    """
     def __init__(self, origin, width, height, data, rounding=3):
+        """ Initialises instance of a MatrixArtist
+        
+        Args:
+            origin (tuple): (x,y) tuple specifying the bottom LH corner of the matrix.
+            width (int): how wide the matrix is to be.
+            height (int): how tall the matrix is to be.
+            data (two dimensional array): the input data for the matrix, can be a numpy array or list of lists.
+            rounding (int): how many decimal places to round data to.
+        """
         
         #Initialising perimeter
         self.bbox = plt.Rectangle(origin, width, height, ec='black', fc='white')
@@ -51,8 +77,10 @@ class MatrixArtist:
         self.nums=nums
  
     def draw(self, ax):
-        """
-        ax (matplotlib.axes.Axes): Instance of matplotlib.axes.Axes to draw the matrix onto.
+        """Draws all artists contained within the MatrixArtist instance on the givn axes.
+        
+        Args:
+            ax (matplotlib.axes.Axes): Instance of matplotlib.axes.Axes to draw the matrix onto.
         """
         #Drawing bounding box
         ax.add_artist(self.bbox)
@@ -71,6 +99,12 @@ class MatrixArtist:
         return(ax)
         
     def update_pos(self, coords, delta=False):
+        """Updates the position of all artists contained within the MatrixArtist instance.
+        
+        Args:
+            coords (tuple): (x,y) coordinates to either set the origin to or increment the origin by.
+            delta (bool): if True increments origin by given coords, default is False.
+        """
         
         #Updating origin and everything will follow
         if delta == True:
@@ -117,6 +151,14 @@ class MatrixArtist:
                 self.nums[i][j].set_position((x,y))
             
 class BatchMatrixArtist:
+    """Class to store a batch of MatrixArtists.
+    
+    The attributes for the batch object will be the same for all the MatrixArtists instances.
+    
+    Attributes:
+        mats (list of MatrixArtists): A list of MatrixArtists which comprise the batch.
+        displacement (tuple): (x,y) tuple to increment the origin of each MatrixArtist by from the first MatrixArtist in the batch.
+    """
     def __init__(self, origin, width, height, data, displacement, rounding=3):
         mats = []
         
@@ -135,12 +177,22 @@ class BatchMatrixArtist:
         self.displacement = displacement
         
     def draw(self, ax):
-        """Passes draw ax to each individual matrix"""
+        """Passes draw ax to each individual matrix
+        
+        Args:
+            ax (matplotlib.axes.Axes): Instance of matplotlib.axes.Axes to draw the matrix onto.
+            
+        """
         for mat in self.mats:
             mat.draw(ax)
     
     def update_pos(self, coords, delta=False):
-        """Passes args to each mat and excutes update_pos iteratively"""
+        """Passes args to each mat and excutes update_pos iteratively
+        
+        Args:
+            coords (tuple): (x,y) coordinates to either set the origin to or increment the origin by.
+            delta (bool): if True increments origin by given coords, default is False.
+        """
         for mat in self.mats:
             mat.update_pos(coords, delta)
             
