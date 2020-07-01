@@ -13,4 +13,4 @@ python demo.py
 ```
 
 It should produce an MP4 video that looks like this:
-![](baisc_animation.gif)
+![](basic_animation.gif)
