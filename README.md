@@ -6,7 +6,7 @@ Python scripts to animate matrix operations for educational purpose in deep lear
 
 The demo script provides an example of a matrix batch moving across the screen.
 
-After cloning the repository and changing directories, run the following command in Terminal.
+After cloning the repository and changing directories, run the following command in Terminal:
 
 ```
 python demo.py
