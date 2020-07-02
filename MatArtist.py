@@ -1,9 +1,9 @@
 """
 Todo:
-    - add GitHub examples
     - Add dimensional arrows
     - Add and remove arrows
     - Moving matrices independently in batch
+    - add negative offset as argument
 """
 
 from matplotlib import pyplot as plt
@@ -20,7 +20,7 @@ class MatrixArtist:
     TODO: 
         - Update public attributes
     """
-    def __init__(self, origin, width, height, data, rounding=3):
+    def __init__(self, origin, width, height, data, fontsize, rounding=3):
         """ Initialises instance of a MatrixArtist
         
         Args:
@@ -28,6 +28,7 @@ class MatrixArtist:
             width (int): how wide the matrix is to be.
             height (int): how tall the matrix is to be.
             data (two dimensional array): the input data for the matrix, can be a numpy array or list of lists.
+            fontsize (int): font size of text to be displayed in matrix. 
             rounding (int): how many decimal places to round data to.
         """
         
@@ -67,11 +68,11 @@ class MatrixArtist:
                 x_pos = origin[0]+self.text_offset[0] + self.cell_size[0]*j+self.neg_offset
                 y_pos = origin[1]+height+self.text_offset[1] - self.cell_size[1]*i
                 if data[i][j] < 0:
-                    text_temp = Text(x_pos, y_pos, np.round(data[i][j], self.rounding), zorder=1)
+                    text_temp = Text(x_pos, y_pos, np.round(data[i][j], self.rounding), fontsize=fontsize, zorder=1)
                     text_temp.set_bbox(dict(alpha=1, facecolor='white' , edgecolor='white'))
                     nums[i].append(text_temp)
                 elif data[i][j] >= 0:
-                    text_temp = Text(x_pos + self.neg_offset, y_pos, np.round(data[i][j], self.rounding), zorder=1)
+                    text_temp = Text(x_pos + self.neg_offset, y_pos, np.round(data[i][j], self.rounding), fontsize=fontsize, zorder=1)
                     text_temp.set_bbox(dict(alpha=1, facecolor='white' , edgecolor='white'))
                     nums[i].append(text_temp)
         self.nums=nums
@@ -159,13 +160,13 @@ class BatchMatrixArtist:
         mats (list of MatrixArtists): A list of MatrixArtists which comprise the batch.
         displacement (tuple): (x,y) tuple to increment the origin of each MatrixArtist by from the first MatrixArtist in the batch.
     """
-    def __init__(self, origin, width, height, data, displacement, rounding=3):
+    def __init__(self, origin, width, height, data, displacement, fontsize, rounding=3):
         mats = []
         
         #Looping through each matrix in the batch and initialising
         for b, matrix in enumerate(data):
             origin_temp = (origin[0]+displacement[0]*b, origin[1]+displacement[1]*b)
-            mat = MatrixArtist(origin_temp, width, height, matrix, rounding)
+            mat = MatrixArtist(origin_temp, width, height, matrix, fontsize, rounding)
             mats.append(mat)
         
         self.mats = mats
