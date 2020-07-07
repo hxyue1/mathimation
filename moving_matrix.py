@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib import animation
+from matplotlib.text import Text
 import numpy as np
 import ffmpeg
 
@@ -17,24 +18,27 @@ fig, ax = plt.subplots(figsize=(18,12))
 ax.set_xlim([-10,600])
 ax.set_ylim([-10,400])
 
+mat = MatrixArtist((10,10), 300, 200, np.random.normal(0,1,(4,3)))
+mat.draw(ax)
+
 #Adding perimeter for matrix
 rectangle = plt.Rectangle((0, 0), width, height, ec='black', fc='white')
 rect_xy = rectangle.xy
-ax.add_patch(rectangle)
+ax.add_artist(rectangle)
 
 #For the row markers
 row_markers = []
 for i in range(0,num_rows-1):
     line = plt.Line2D((0,width), (cell_size[1]+i*cell_size[1],cell_size[1]+i*cell_size[1]), color = 'black', lw=1)
     row_markers.append(line)
-    ax.add_line(line)
+    ax.add_artist(line)
 
 #For the column markers
 col_markers = []
 for i in range(0,num_cols-1):    
     line = plt.Line2D((cell_size[0]+i*cell_size[0],cell_size[0]+i*cell_size[0]), (0,height), color = 'black', lw=1)
     col_markers.append(line)
-    ax.add_line(line)
+    ax.add_artist(line)
 
 #Offset from top LH corner of cell
 cell_offset = (cell_size[0]/4, -2*cell_size[1]/3)
@@ -43,21 +47,24 @@ neg_offset = -3.5
 
 #Adding numbers
 nums_text = [[] for i in range(0,num_rows)]
-text_pos = [[] for i in range(0,num_rows)]
 for i in range(0, num_rows):
     for j in range(0, num_cols):
+        #Adjusting x position for negative sign
         if nums[i,j]<0:
+            #Setting x and y position for textbox
             x_pos = mat_loc[0]+cell_offset[0]+j*cell_size[0] + neg_offset
             y_pos = mat_loc[1] + height + cell_offset[1]-i*cell_size[1]
-            text = ax.text(x_pos, y_pos, np.round(nums[i,j],2), fontsize=18)
-            text_pos[i].append([x_pos, y_pos])
-            nums_text[i].append(text)
+            #Initialising text and adding to axes
+            text_temp = Text(x_pos, y_pos, np.round(nums[i,j],2), fontsize=18)
+            ax.add_artist(text_temp)
+            #Storing text instance
+            nums_text[i].append(text_temp)
         elif nums[i, j]>=0:
             x_pos = mat_loc[0]+cell_offset[0]+j*cell_size[0]
             y_pos = mat_loc[1] + height + cell_offset[1]-i*cell_size[1]
-            text = ax.text(x_pos, y_pos, np.round(nums[i,j],3), fontsize=18)
-            text_pos[i].append([x_pos, y_pos])
-            nums_text[i].append(text)
+            text_temp = Text(x_pos, y_pos, np.round(nums[i,j],3), fontsize=18)
+            ax.add_artist(text_temp)
+            nums_text[i].append(text_temp)
 
 # animation function.  This is called sequentially
 def animate(frame):
@@ -86,8 +93,7 @@ def animate(frame):
     return []
 
 
-anim = animation.FuncAnimation(fig, animate, #init_func=init,
-                               frames=200, interval=20000000000, blit=True)
+anim = animation.FuncAnimation(fig, animate,frames=200, blit=True)
 
 Writer = animation.writers['ffmpeg']
 writer = Writer(fps=64, metadata=dict(artist='Me'), bitrate=1800)
